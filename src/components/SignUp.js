@@ -1,15 +1,35 @@
-import React, { useRef } from 'react';
-import { Form, Card } from "react-bootstrap"
+import React, { useRef, useState } from 'react';
+import { Button, Form, Card, Alert } from "react-bootstrap"
+import { useAuth } from "../components/context/AuthContext"
 const SignUp = () => {
     const emailRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmRef = useRef();
+    const { signUp } = useAuth();
+    const [error, setError] = useState("")
+    const [loading, setLoading] = useState(false)
+    async function handleSubmit(e) {
+        e.preventDefault();
+        if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+            return setError("Password does not match, check again")
+        }
+        try {
+            setError("")
+            setLoading(false)
+            await signUp(emailRef.current.value, passwordRef.current.value)
+        } catch {
+            setError("Cannot create acount")
+            setLoading(true)
+        }
+    }
     return (
         <>
             <Card>
                 <Card.Body>
                     <h2 className="text-center mb-4">Sign Up</h2>
-                    <Form>
+
+                    {error && <Alert variant="danger">{error}</Alert>}
+                    <Form onSubmit={handleSubmit}>
                         <Form.Group>
                             <Form.Label>Email</Form.Label>
                             <Form.Control type="email" ref={emailRef} />
@@ -22,6 +42,7 @@ const SignUp = () => {
                             <Form.Label>Confirm Password</Form.Label>
                             <Form.Control type="password" ref={passwordConfirmRef} />
                         </Form.Group>
+                        <Button type="submit" className="w-100" disabled={loading}>Sign Up</Button>
                     </Form>
                 </Card.Body>
 
